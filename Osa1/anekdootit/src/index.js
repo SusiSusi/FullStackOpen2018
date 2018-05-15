@@ -7,18 +7,27 @@ const Button = ({ text, handleClick }) => (
     </button>
 )
 
-const getRandomNumber = () => (
+const MostVotes = ({ votes }) => {
+    const biggestValue = BiggestValue(votes)
+    const index = votes.indexOf(biggestValue)   
+    return <GetAnecdote index={index} votes={votes}/>
+}
+
+const GetAnecdote = ({ index, votes }) => (
+    <div>
+    <p>{anecdotes[index]} </p>
+    <p>has {votes[index]} votes</p>
+    </div>
+)
+
+const GetRandomNumber = () => (
     Math.floor((Math.random() * anecdotes.length))
 )
 
-const addNewVote = (votes, index) => {
-    const copyOfVotes = [...votes]
-    if (copyOfVotes[index]) {
-        copyOfVotes[index] += 1
-    } else {
-        copyOfVotes[index] = 1
-    }
-    return copyOfVotes
+const BiggestValue = (votes) => {
+    const copy = [...votes]
+    const biggest = Math.max.apply(Math, copy)
+    return biggest
 }
 
 class App extends React.Component {
@@ -26,23 +35,24 @@ class App extends React.Component {
     super(props)
     this.state = {
       selected: 0,
-      votes: [0]
+      votes: new Array(this.props.anecdotes.length).fill(0)
     }
   }
 
   onClick = () => {
     return () => {
         this.setState({
-            selected: getRandomNumber()
+            selected: GetRandomNumber()
         })
         }  
     }
 
     onClickVote = (anecdote) => {      
-        const copyVotes = addNewVote(this.state.votes, anecdote)
+        const copyOfVotes = [...this.state.votes]
+        copyOfVotes[anecdote] += 1
         return () => {
             this.setState({
-                votes: copyVotes
+                votes: copyOfVotes
             })
        } 
     }
@@ -64,8 +74,10 @@ class App extends React.Component {
         text={"Vote"}
         />
         <Button handleClick={this.onClick()}
-        text={"Next anecode"}
+        text={"Next anecdote"}
         />
+        <h3>Anecdote with most votes:</h3>
+        <MostVotes votes={this.state.votes}/>
       </div>
     )
   }
