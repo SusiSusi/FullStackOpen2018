@@ -23,16 +23,6 @@ const notes = [
   }
 ]
 
- /* const rivit = () => notes.map(note => <li key={note.id}>{note.content}</li>)*/
-
- /* const rivit = () => notes.map(note =>
-    <li key={note.id}>
-    {note.content}
-    </li>
-)*/
-
-/* const rivit = () => notes.map((note, i) => <li key={i}>{note.content}</li>)*/
-
 
 ReactDOM.render(
   <App notes={notes} />,
