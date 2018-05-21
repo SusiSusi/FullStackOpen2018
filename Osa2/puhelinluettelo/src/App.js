@@ -1,6 +1,6 @@
 import React from 'react';
 import Person from './components/Person'
-import axios from 'axios'
+import personService from './services/persons'
 
 
 const FindPerson = ({ persons, newName, find }) => {
@@ -25,8 +25,8 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    axios
-      .get('http://localhost:3001/persons')
+    personService
+      .getAll()
       .then(response => {
         this.setState({ persons: response.data })
       })
@@ -50,13 +50,15 @@ class App extends React.Component {
         phone: this.state.newPhone
       }
 
-      const persons = this.state.persons.concat(personObject)
-
-      this.setState({
-        persons,
-        newName: '',
-        newPhone: ''
-      })
+      personService
+        .create(personObject)
+        .then(response => {
+          this.setState({
+            persons: this.state.persons.concat(response.data),
+            newName: '',
+            newPhone: ''
+          })
+        })
   }
   }
 
