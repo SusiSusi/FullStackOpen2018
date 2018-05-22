@@ -1,12 +1,11 @@
 import React from 'react'
 
-const Person = ({ person, onClickDelete }) => {
+const Person = ({ person, deletePerson }) => {
     return (
-        <div>
-        {person.name} {person.phone}
-        &nbsp;&nbsp;&nbsp;&nbsp;
-        <button onClick={onClickDelete}>Poista</button>
-        </div>
+        <tr>
+            <td>{person.name} {person.phone}</td>
+            <td><button onClick={ () => deletePerson(person.id) }>Poista</button></td>            
+        </tr>
     )
 }
 

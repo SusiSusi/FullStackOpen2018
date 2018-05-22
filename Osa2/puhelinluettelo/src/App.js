@@ -1,17 +1,7 @@
-import React from 'react';
-import Person from './components/Person'
+import React from 'react'
+import Number from './components/Number'
+import Notification from './components/Notification'
 import personService from './services/persons'
-
-
-const FindPerson = ({ persons, newName, find }) => {
-  const foundPersons = persons.filter(person => 
-    person.name.toUpperCase().includes(find.toUpperCase()))
-    return(
-      <div>
-        {foundPersons.map(person => <Person key={person.name} person={person} />)}
-    </div>
-    )
-}
 
 class App extends React.Component {
   constructor(props) {
@@ -20,7 +10,8 @@ class App extends React.Component {
       persons: [],
       newName: '',
       newPhone: '',
-      find: ''
+      find: '',
+      message: null
     }
   }
 
@@ -32,18 +23,48 @@ class App extends React.Component {
       })
   }
 
+  updatePerson = (found) => {
+    if(window.confirm(`Päivitetäänkö ${found.name} puhelin?`)){
+      const personObject = {
+        name: found.name,
+        phone: this.state.newPhone,
+        id: found.id
+      }
+      personService
+        .update(found.id, personObject)
+        .then(response => {
+          const persons = this.state.persons.filter(person => person.id !== found.id)
+          this.setState({
+            persons: persons.concat(personObject),
+            newName: '',
+            newPhone: '',
+            message: `Henkilön ${personObject.name} puhelinnumero muutettu.`
+          })
+          setTimeout(() => {
+            this.setState({ message: null })
+          }, 3000);
+        })
+        .catch(error => {
+          alert(`Henkilö ${found.name} on jo valitettavasti poistettu palvelimelta`)
+          this.setState({ persons: this.state.persons.filter(n => n.id !== found.id) })
+        })
+      } 
+      else {
+        this.setState({
+          persons: this.state.persons,
+          newName: '',
+          newPhone: ''
+      })
+    }
+  }
+
   addPerson = (event) => {
     event.preventDefault()
 
     const found = this.state.persons.find(person => person.name === this.state.newName)
 
     if (found) {
-      this.setState({
-        persons: this.state.persons,
-        newName: '',
-        newPhone: ''
-      })
-
+      this.updatePerson(found)
     } else {
       const personObject = {
         name: this.state.newName,
@@ -56,10 +77,36 @@ class App extends React.Component {
           this.setState({
             persons: this.state.persons.concat(response.data),
             newName: '',
-            newPhone: ''
+            newPhone: '',
+            message: `Henkilö ${personObject.name} lisätty onnistuneesti!`
           })
+          setTimeout(() => {
+            this.setState({ message: null })
+          }, 3000);
         })
   }
+  }
+
+  handleDelete = (id) => {
+    const person = this.state.persons.find(person => person.id === id)
+    if(window.confirm(`Poistetaanko ${person.name}?`)){
+      personService
+        .deletePerson(id)
+        .then( response => {
+          const newPersons = this.state.persons.filter(person => person.id !== id)
+          this.setState({ 
+            persons: newPersons,
+            message: `Henkilö ${person.name} poistettu.`
+          })
+          setTimeout(() => {
+            this.setState({ message: null })
+          }, 3000);
+        })
+        .catch(error => {
+          alert(`Henkilö ${person.name} on jo valitettavasti poistettu palvelimelta`)
+          this.setState({ persons: this.state.persons.filter(n => n.id !== id) })
+        })
+    }
   }
 
   handeNameChange = (event) => {
@@ -79,6 +126,7 @@ class App extends React.Component {
     return (
       <div>
         <h1>Puhelinluettelo</h1>
+        <Notification message={this.state.message} />
         <div>
           Rajaa näytettäviä: 
           <input
@@ -106,11 +154,8 @@ class App extends React.Component {
             <button type="submit">Lisää</button>
           </div>
         </form>
-        <h2>Numerot</h2>
-        <div>
-          {<FindPerson persons={this.state.persons} newName={this.state.newName} find={this.state.find} />}
-        </div>
-        ...
+          <Number persons={this.state.persons} find={this.state.find} 
+          deletePerson={this.handleDelete.bind(this)}/>
       </div>
     )
   }
