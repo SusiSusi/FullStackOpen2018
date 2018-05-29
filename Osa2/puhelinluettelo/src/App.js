@@ -11,7 +11,7 @@ class App extends React.Component {
       newName: '',
       newPhone: '',
       find: '',
-      message: null
+      error: null
     }
   }
 
@@ -38,10 +38,10 @@ class App extends React.Component {
             persons: persons.concat(personObject),
             newName: '',
             newPhone: '',
-            message: `Henkilön ${personObject.name} puhelinnumero muutettu.`
+            error: `Henkilön ${personObject.name} puhelinnumero muutettu.`
           })
           setTimeout(() => {
-            this.setState({ message: null })
+            this.setState({ error: null })
           }, 3000);
         })
         .catch(error => {
@@ -78,10 +78,10 @@ class App extends React.Component {
             persons: this.state.persons.concat(response.data),
             newName: '',
             newPhone: '',
-            message: `Henkilö ${personObject.name} lisätty onnistuneesti!`
+            error: `Henkilö ${personObject.name} lisätty onnistuneesti!`
           })
           setTimeout(() => {
-            this.setState({ message: null })
+            this.setState({ error: null })
           }, 3000);
         })
   }
@@ -96,10 +96,10 @@ class App extends React.Component {
           const newPersons = this.state.persons.filter(person => person.id !== id)
           this.setState({ 
             persons: newPersons,
-            message: `Henkilö ${person.name} poistettu.`
+            error: `Henkilö ${person.name} poistettu.`
           })
           setTimeout(() => {
-            this.setState({ message: null })
+            this.setState({ error: null })
           }, 3000);
         })
         .catch(error => {
@@ -126,7 +126,7 @@ class App extends React.Component {
     return (
       <div>
         <h1>Puhelinluettelo</h1>
-        <Notification message={this.state.message} />
+        <Notification message={this.state.error} />
         <div>
           Rajaa näytettäviä: 
           <input
