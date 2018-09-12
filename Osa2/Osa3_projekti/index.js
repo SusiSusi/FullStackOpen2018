@@ -2,9 +2,11 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const Note = require('./models/note')
 
 app.use(bodyParser.json())
 app.use(cors())
+app.use(express.static('build'))
 
 let notes = [
     {
@@ -26,31 +28,53 @@ let notes = [
       important: true
     }
   ]
+
+const formatNote = (note) => {
+    return {
+        content: note.content,
+        date: note.date,
+        important: note.important,
+        id: note._id
+    }
+}
   
 app.get('/', (req, res) => {
     res.send('<h1>Hello World!</h1>')
 })
 
-app.get('/notes', (req, res) => {
-    res.json(notes)
+app.get('/api/notes', (req, res) => {
+    Note
+        .find({})
+        .then(notes => {
+            res.json(notes.map(formatNote))
+        })
 })
 
-app.get('/notes/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const note = notes.find(note => note.id === id)
-
-    if (note) {
-        response.json(note)
-    } else {
-        response.status(404).end()
-    }
+app.get('/api/notes/:id', (request, response) => {
+    Note
+        .findById(request.param.id)
+        .then(note => {
+            if(note) {
+                response.json(formatNote(note))
+            } else {
+                response.status(404).end()
+            }
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(400).send({ error: 'malformatted id' })
+        })
 })
 
-app.delete('/notes/:id', (request, response) => {
-    const id = Number(request.params.id)
-    notes = notes.filter(note => note.id !== id)
-
-    response.status(204).end()
+app.delete('/api/notes/:id', (request, response) => {
+    Note
+        .findByIdAndRemove(request.param.id)
+        .then(result => {
+            response.status(204).end()
+        })
+        .catch(error => {
+            response.status(400).send({ error: 'malformatted id' })
+        })
 })
 
 const generateId = () => {
@@ -58,25 +82,47 @@ const generateId = () => {
     return maxId + 1
   }
 
-app.post('/notes', (request, response) => {
+app.post('/api/notes', (request, response) => {
     const body = request.body
     
     if (body.content === undefined) {
         return response.status(404).json({ error: 'content missing' })
     }
 
-    const note = {
+    const note = new Note({
         content: body.content,
         important: body.important || false,
-        date: new Date(),
-        id: generateId()
-    }
+        date: new Date()
+    })
 
-    notes = notes.concat(notes)
-    response.json(note)
+    note
+    .save()
+    .then(formatNote)
+    .then(savedAndFormattedNote => {
+      response.json(savedAndFormattedNote)
+    })
 })
 
-const PORT = process.env.PORT || 3002
+app.put('/api/notes/:id', (request, response) => {
+    const body = request.body
+
+    const note = {
+        content: body.content,
+        important: body.important
+    }
+
+    Note
+        .findByIdAndUpdate(request.params.id, note, { new: true })
+        .then(updatedNote => {
+            response.json(formatNote(updatedNote))
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(400).send({ error: 'malformatted id' })
+        })
+})
+
+const PORT = process.env.PORT || 3002   
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
   })
