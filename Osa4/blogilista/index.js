@@ -3,6 +3,7 @@ const app = express()
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const mongoose = require('mongoose')
+const middleware = require('./utils/middleware')
 const blogsRouter = require('./controllers/blogs')
 
 if (process.env.NODE_ENV !== 'production') {
@@ -21,6 +22,8 @@ mongoose
 app.use(bodyParser.json())
 app.use(cors())
 app.use('/api/blogs', blogsRouter)
+app.use(middleware.logger)
+app.use(middleware.error)
 
 
 const PORT = process.env.PORT || 3001
