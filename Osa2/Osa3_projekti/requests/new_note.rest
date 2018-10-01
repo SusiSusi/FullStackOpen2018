@@ -1,7 +1,9 @@
-POST http://localhost:3001/notes
+POST http://localhost:3001/api/notes
 content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVybWVsb2kiLCJpZCI6IjViYjFmYTcwNzJkOGFmMjgzOWI5YTYxMiIsImlhdCI6MTUzODM5MjEwOX0.CzkFVsdeQjCoh3NBB4PwzVKRiXNa107i44EI4nPHDlQ
 
 {
-    "content": "VS Coden REST client on hyvä",
-    "important": true
+    "content": "Token-autentikaatio onnistuu",
+    "important": true,
+    "userId": "5bb1d8545c15b71e62fbe63c"
 }

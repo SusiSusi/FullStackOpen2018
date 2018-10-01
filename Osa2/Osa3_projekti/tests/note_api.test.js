@@ -2,7 +2,8 @@ const supertest = require('supertest')
 const { app, server } = require('../index')
 const api = supertest(app)
 const Note = require('../models/note')
-const { format, initialNotes, nonExistingId, notesInDb } = require('./test_helper')
+const User = require('../models/user')
+const { initialNotes, nonExistingId, notesInDb, usersInDb } = require('./test_helper')
 
 describe('when there is initially some notes saved', async () => {
   beforeAll(async () => {
@@ -43,15 +44,15 @@ describe('when there is initially some notes saved', async () => {
   test('404 returned by GET /api/notes/:id with nonexisting valid id', async () => {
     const validNonexistingId = await nonExistingId()
 
-    const response = await api
+    await api
       .get(`/api/notes/${validNonexistingId}`)
       .expect(404)
   })
 
   test('400 is returned by GET /api/notes/:id with invalid id', async () => {
-    const invalidId = "5a3d5da59070081a82a3445"
+    const invalidId = '5a3d5da59070081a82a3445'
 
-    const response = await api
+    await api
       .get(`/api/notes/${invalidId}`)
       .expect(400)
   })
@@ -94,8 +95,6 @@ describe('when there is initially some notes saved', async () => {
 
       const notesAfterOperation = await notesInDb()
 
-      const contents = notesAfterOperation.map(r => r.content)
-
       expect(notesAfterOperation.length).toBe(notesAtStart.length)
     })
   })
@@ -126,6 +125,57 @@ describe('when there is initially some notes saved', async () => {
       expect(notesAfterOperation.length).toBe(notesAtStart.length - 1)
     })
   })
+
+  describe('when there is initially one user at db', async () => {
+    beforeAll(async () => {
+      await User.remove({})
+      const user = new User({ username: 'root', password: 'sekret' })
+      await user.save()
+    })
+
+    test('POST /api/users succeeds with a fresh username', async () => {
+      const usersBeforeOperation = await usersInDb()
+
+      const newUser = {
+        username: 'miisai',
+        name: 'Miisa Urmeli',
+        password: 'salainen'
+      }
+
+      await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+      const usersAfterOperation = await usersInDb()
+      expect(usersAfterOperation.length).toBe(usersBeforeOperation.length + 1)
+      const usernames = usersAfterOperation.map(u => u.username)
+      expect(usernames).toContain(newUser.username)
+    })
+
+    test('POST /api/users fails with proper statuscode and message if username already taken', async () => {
+      const usersBeforeOperation = await usersInDb()
+
+      const newUser = {
+        username: 'root',
+        name: 'Superuser',
+        password: 'salainen'
+      }
+
+      const result = await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+
+      expect(result.body).toEqual({ error: 'username must be unique' })
+
+      const usersAfterOperation = await usersInDb()
+      expect(usersAfterOperation.length).toBe(usersBeforeOperation.length)
+    })
+  })
+
 
   afterAll(() => {
     server.close()

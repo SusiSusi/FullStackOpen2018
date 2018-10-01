@@ -1,0 +1,10 @@
+POST http://localhost:3001/api/users
+content-type: application/json
+
+{
+    "username": "Irmeli",
+    "name": "Urmeloidi",
+    "password": "seiti4ever",
+    "adult": true,
+    "blogs": [ "5ba49352ba1c071c97bf6b10", "5ba4935fba1c071c97bf6b11" ]
+}
