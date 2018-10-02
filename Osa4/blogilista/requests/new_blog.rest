@@ -1,8 +1,9 @@
 POST http://localhost:3001/api/blogs
 content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IklybWVsaSIsImlkIjoiNWJiMjEyYjY1MGY2MTczNjYyOTBlZDFhIiwiaWF0IjoxNTM4NDY1Mzc2fQ.5GapqkvewEwG-as_NgliGwBJlLMLZSrM60zTD3pbdUU
 
 {
-    "title": "React blogs",
+    "title": "Poistettava3 ",
     "author": "n.n",
     "url": "https://reactjs.org/blog",
     "likes": 5,
