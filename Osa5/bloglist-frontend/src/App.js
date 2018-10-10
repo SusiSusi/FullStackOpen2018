@@ -4,6 +4,7 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
 import BlogForm from './components/BlogForm'
+import Togglable from './components/Togglable'
 
 class App extends React.Component {
   constructor(props) {
@@ -57,6 +58,30 @@ class App extends React.Component {
       })
   }
 
+  updateBlog = (blog) => (event) => {
+    try {
+      event.preventDefault()
+      const blogObject = {
+        title: blog.title,
+        author: blog.author,
+        url: blog.url,
+        likes: blog.likes + 1
+      }
+
+      blogService
+        .update(blog.id, blogObject)
+        .then(updatedBlog => {
+          console.log('palautus', updatedBlog)
+          const blogs = this.state.blogs.filter(b => b.id !== blog.id)
+          this.setState({
+            blogs: blogs.concat(updatedBlog)
+          })
+        })
+    } catch (exception) {
+      console.log(exception)
+    }
+  }
+
   handleLoginFieldChange = (event) => {
     this.setState({ [event.target.name]: event.target.value })
   }
@@ -94,6 +119,8 @@ class App extends React.Component {
   }
 
   render() {
+
+    const sortBlogs = (a, b) => b.likes - a.likes
 
     if (this.state.user === null) {
       return (
@@ -141,19 +168,23 @@ class App extends React.Component {
             </div>
           </form>
 
-          <BlogForm
-            onSubmit={this.addBlog}
-            handleLoginFieldChange={this.handleLoginFieldChange}
-            newBlogTitle={this.state.newBlogTitle}
-            newBlogAuthor={this.state.newBlogAuthor}
-            newBlogUrl={this.state.newBlogUrl}
-            newBlogLikes={this.state.newBlogLikes}
-          />
+          <Togglable buttonLabel="New blog">
+            <BlogForm
+              onSubmit={this.addBlog}
+              handleLoginFieldChange={this.handleLoginFieldChange}
+              newBlogTitle={this.state.newBlogTitle}
+              newBlogAuthor={this.state.newBlogAuthor}
+              newBlogUrl={this.state.newBlogUrl}
+              newBlogLikes={this.state.newBlogLikes}
+            />
+          </Togglable>
 
           <div>
             <br></br>
-            {this.state.blogs.map(blog =>
-              <Blog key={blog._id} blog={blog} />
+            {this.state.blogs.sort(sortBlogs).map(blog =>
+              <Togglable otsikko={blog.title}>
+                <Blog key={blog._id} blog={blog} updateBlog={this.updateBlog(blog)} />
+              </Togglable>
             )}
           </div>
 
