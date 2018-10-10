@@ -1,33 +1,28 @@
 import React from 'react'
 
-class Blog extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      likes: this.props.blog.likes
-    }
+const Blog = ({ blog, updateBlog, deleteBlog, deleteButtonVisible }) => {
+
+  const blogStyle = {
+    paddingTop: 10,
+    paddingLeft: 2,
+    border: 'solid',
+    borderWidth: 1,
+    marginBottom: 5
   }
 
-  render() {
+  const visible = { display: deleteButtonVisible ? '' : 'none' }
 
-    const blogStyle = {
-      paddingTop: 10,
-      paddingLeft: 2,
-      border: 'solid',
-      borderWidth: 1,
-      marginBottom: 5
-    }
-
-    return (
-      <div style={blogStyle}>
-        <div>{this.props.blog.title}</div>
-        <div>{this.props.blog.author}</div>
-        <div>{this.props.blog.url}</div>
-        <div>{this.state.likes} likes <button onClick={this.props.updateBlog}>Like!</button></div>
-        <div>Added by {this.props.blog.user.name}  </div>
-      </div>
-    )
-  }
+  return (
+    <div style={blogStyle}>
+      <div>{blog.title}</div>
+      <div>{blog.author}</div>
+      <div>{blog.url}</div>
+      <div>{blog.likes} likes <button onClick={updateBlog}>Like!</button></div>
+      <div>Added by {blog.user.name}  </div>
+      <button onClick={deleteBlog} style={visible}> Delete </button>
+    </div>
+  )
 }
+
 
 export default Blog

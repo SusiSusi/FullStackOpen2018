@@ -17,7 +17,7 @@ class App extends React.Component {
       newBlogLikes: '',
       username: '',
       password: '',
-      user: null,
+      user: '',
       error: null
     }
   }
@@ -71,7 +71,6 @@ class App extends React.Component {
       blogService
         .update(blog.id, blogObject)
         .then(updatedBlog => {
-          console.log('palautus', updatedBlog)
           const blogs = this.state.blogs.filter(b => b.id !== blog.id)
           this.setState({
             blogs: blogs.concat(updatedBlog)
@@ -82,6 +81,32 @@ class App extends React.Component {
     }
   }
 
+  deleteBlog = (blog) => (event) => {
+    try {
+      if (window.confirm(`Delete ${blog.title}?`)) {
+        if (this.state.user.name === blog.user.name) {
+          blogService
+            .deleteBlog(blog.id)
+            .then(result => {
+              const blogs = this.state.blogs.filter(b => b.id !== blog.id)
+              this.setState({
+                blogs: blogs,
+                error: `Blog '${blog.title}' has been deleted`
+              })
+              setTimeout(() => {
+                this.setState({ error: null })
+              }, 5000);
+            })
+        } else {
+          this.setState({ error: 'You do not have permission to delete this blog' })
+        } setTimeout(() => {
+          this.setState({ error: null })
+        }, 5000);
+      }
+    } catch (exception) {
+      console.log(exception)
+    }
+  }
   handleLoginFieldChange = (event) => {
     this.setState({ [event.target.name]: event.target.value })
   }
@@ -119,7 +144,6 @@ class App extends React.Component {
   }
 
   render() {
-
     const sortBlogs = (a, b) => b.likes - a.likes
 
     if (this.state.user === null) {
@@ -155,6 +179,7 @@ class App extends React.Component {
     }
 
     return (
+
       <div>
         <h2>Blogs</h2>
 
@@ -183,7 +208,12 @@ class App extends React.Component {
             <br></br>
             {this.state.blogs.sort(sortBlogs).map(blog =>
               <Togglable otsikko={blog.title}>
-                <Blog key={blog._id} blog={blog} updateBlog={this.updateBlog(blog)} />
+                <Blog
+                  key={blog._id}
+                  blog={blog}
+                  updateBlog={this.updateBlog(blog)}
+                  deleteBlog={this.deleteBlog(blog)}
+                  deleteButtonVisible={this.state.user.name === blog.user.name} />
               </Togglable>
             )}
           </div>
