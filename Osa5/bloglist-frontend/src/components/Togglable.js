@@ -24,8 +24,8 @@ class Togglable extends React.Component {
               {this.props.otsikko}
             </div>
           </div>
-          <div style={showWhenVisible}>
-            <div onClick={this.toggleVisibility}>
+          <div style={showWhenVisible} className="togglableContent">
+            <div onClick={this.toggleVisibility} className="open">
               {this.props.children}
             </div>
           </div>

@@ -14,8 +14,8 @@ const Blog = ({ blog, updateBlog, deleteBlog, deleteButtonVisible }) => {
 
   return (
     <div style={blogStyle}>
-      <div>{blog.title}</div>
-      <div>{blog.author}</div>
+      <div className="title">{blog.title}</div>
+      <div className="author">{blog.author}</div>
       <div>{blog.url}</div>
       <div>{blog.likes} likes <button onClick={updateBlog}>Like!</button></div>
       <div>Added by {blog.user.name}  </div>
